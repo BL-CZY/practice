@@ -6,6 +6,9 @@
 	import SavingGoals from '$lib/saving-goals.svelte';
 	import CategoryChart from '$lib/category-chart.svelte';
 	import { untrack } from 'svelte';
+	import Chatbot from '$lib/chatbot.svelte';
+
+	let goals: Goal[] = $state([]); // Initialize goals state
 
 	// --- CSV Table State ---
 	let table: string[][] = $state([]);
@@ -146,7 +149,7 @@ Expected output format:
 	let alert = $state('');
 	async function getAlert() {
 		if (!categoryInfo || categoryInfo.length === 0) return;
-		const prompt = `Given the following spending categories and their sums (in JSON), provide a single concise alert or warning if you notice any concerning spending patterns. If everything looks fine, reply "All clear." Only reply with the alert or "All clear." Do not include explanations.
+		const prompt = `Given the following spending categories and their sums (in JSON), provide a single concise alert or warning if you notice any concerning spending patterns. If everything looks fine, reply "All clear." Only reply with the alert or "All clear." Do not include explanations. Include some numbers that must have units. The unit is ${table[1][6] || 'EUR'}.
 
 categoryInfo:
 ${JSON.stringify(categoryInfo, null, 2)}
@@ -159,9 +162,9 @@ ${JSON.stringify(categoryInfo, null, 2)}
 	let warning = $state('');
 	async function getWarning() {
 		if (!categoryInfo || categoryInfo.length === 0) return;
-		const prompt = `Analyze the following spending categories and their sums (in JSON). If you see any potential financial risks or overspending, reply with a short warning message. If not, reply "No warnings." Only reply with the warning or "No warnings." Do not include explanations.
+		const prompt = `Analyze the following spending categories and their sums (in JSON). If you see any potential financial risks or overspending, reply with a short warning message. If not, reply "No warnings." Only reply with the warning or "No warnings." Do not include explanations. Include some numbers that must have units. The unit is ${table[1][6] || 'EUR'}.
 
-categoryInfo:
+ Include some numbers.categoryInfo:
 ${JSON.stringify(categoryInfo, null, 2)}
 `;
 		//@ts-ignore
@@ -172,7 +175,7 @@ ${JSON.stringify(categoryInfo, null, 2)}
 	let suggestions: string[] = $state([]);
 	async function getSuggestions() {
 		if (!categoryInfo || categoryInfo.length === 0) return;
-		const prompt = `Given the following spending categories and their sums (in JSON), suggest up to 3 actionable tips to improve financial health. Reply as a JSON array of strings. Do not include any explanations or formatting.
+		const prompt = `Given the following spending categories and their sums (in JSON), suggest up to 3 actionable tips to improve financial health. Reply as a JSON array of strings. Do not include any explanations or formatting. Include some numbers that must have units. The unit is ${table[1][6] || 'EUR'}.
 
 categoryInfo:
 ${JSON.stringify(categoryInfo, null, 2)}
@@ -415,8 +418,13 @@ Expected output format:
 				<div class="card bg-base-100 shadow-lg">
 					<div class="card-body p-4 lg:p-6">
 						<h2 class="card-title text-lg lg:text-xl">Saving Goals</h2>
-						<div class="mt-4">
-							<SavingGoals {table} />
+						<div class="mt-4 overflow-auto">
+							<SavingGoals
+								{table}
+								updateGoals={(input) => {
+									goals = input;
+								}}
+							/>
 						</div>
 					</div>
 				</div>
@@ -436,6 +444,18 @@ Expected output format:
 		</div>
 	{/if}
 </div>
+
+<Chatbot
+	data={categoryInfo}
+	{goals}
+	currency={(() => {
+		if (table.length > 1 && table[1].length > 6) {
+			return table[1][6];
+		} else {
+			return 'EUR'; // Default currency if not found
+		}
+	})()}
+/>
 
 <!-- Mobile-specific styles -->
 <style>

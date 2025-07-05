@@ -1,18 +1,18 @@
 <script lang="ts">
 	import { nanoid } from 'nanoid';
-	let { table }: { table: string[][] } = $props();
 
-	// --- Saving Goals State & Types ---
-	type Goal = {
-		id: string;
-		name: string;
-		amount: number;
-		priority: number;
-	};
+	let { table, updateGoals }: { table: string[][]; updateGoals: (goals: Goal[]) => void } =
+		$props();
 
-	let goals: Goal[] = $state([]);
 	let newGoalName = $state('');
 	let newGoalAmount: number | '' = $state('');
+
+	let goals: Goal[] = $state([]);
+
+	$effect(() => {
+		goals;
+		updateGoals(goals);
+	});
 
 	// --- Saving Goals Logic ---
 	function addGoal(e: Event) {
