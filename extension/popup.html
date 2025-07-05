@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Transaction Chart Analyzer</title>
+  <style>
+    body {
+      width: 800px;
+      height: 600px;
+      margin: 0;
+      padding: 20px;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: #333;
+    }
+
+    .container {
+      background: rgba(255, 255, 255, 0.95);
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+      backdrop-filter: blur(10px);
+      height: calc(100% - 48px);
+      overflow-y: auto;
+    }
+
+    h1 {
+      margin: 0 0 24px 0;
+      font-size: 28px;
+      font-weight: 700;
+      background: linear-gradient(45deg, #667eea, #764ba2);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-align: center;
+    }
+
+    .input-section {
+      margin-bottom: 24px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 600;
+      color: #555;
+    }
+
+    textarea {
+      width: 100%;
+      height: 120px;
+      padding: 12px;
+      border: 2px solid #e1e5e9;
+      border-radius: 8px;
+      font-family: 'Courier New', monospace;
+      font-size: 12px;
+      resize: vertical;
+      transition: border-color 0.3s ease;
+    }
+
+    textarea:focus {
+      outline: none;
+      border-color: #667eea;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+
+    .button-container {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+
+    button {
+      padding: 12px 24px;
+      border: none;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-size: 14px;
+    }
+
+    .analyze-btn {
+      background: linear-gradient(45deg, #667eea, #764ba2);
+      color: white;
+      flex: 1;
+    }
+
+    .analyze-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+    }
+
+    .clear-btn {
+      background: #f8f9fa;
+      color: #6c757d;
+      border: 1px solid #dee2e6;
+    }
+
+    .clear-btn:hover {
+      background: #e9ecef;
+      color: #495057;
+    }
+
+    .error {
+      background: #fee;
+      color: #c33;
+      padding: 12px;
+      border-radius: 8px;
+      margin-bottom: 16px;
+      border-left: 4px solid #c33;
+    }
+
+    .charts-container {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      margin-top: 24px;
+    }
+
+    .chart-card {
+      background: white;
+      border-radius: 12px;
+      padding: 16px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      border: 1px solid #e1e5e9;
+    }
+
+    .chart-card h3 {
+      margin: 0 0 16px 0;
+      font-size: 16px;
+      font-weight: 600;
+      color: #333;
+      text-align: center;
+    }
+
+    .chart-container {
+      position: relative;
+      height: 250px;
+    }
+
+    .stats-container {
+      grid-column: 1 / -1;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+
+    .stat-card {
+      background: white;
+      border-radius: 12px;
+      padding: 16px;
+      text-align: center;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      border: 1px solid #e1e5e9;
+    }
+
+    .stat-value {
+      font-size: 24px;
+      font-weight: 700;
+      color: #333;
+      margin-bottom: 4px;
+    }
+
+    .stat-label {
+      font-size: 12px;
+      color: #666;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    .loading {
+      text-align: center;
+      padding: 40px;
+      color: #666;
+    }
+
+    .spinner {
+      border: 3px solid #f3f3f3;
+      border-top: 3px solid #667eea;
+      border-radius: 50%;
+      width: 30px;
+      height: 30px;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 16px;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>💳 Transaction Chart Analyzer</h1>
+    
+    <div class="input-section">
+      <label for="csvInput">Paste your CSV transaction data:</label>
+      <textarea id="csvInput" placeholder="Paste your CSV data here...
+Example format:
+,date,description,amount,type,account_number,currency
+0,2025-04-06,BOOKSTORE.COM,-24.13,debit,MT84MALT...,EUR"></textarea>
+    </div>
+
+    <div class="button-container">
+      <button class="analyze-btn" id="analyzeBtn">📊 Analyze & Generate Charts</button>
+      <button class="clear-btn" id="clearBtn">🗑️ Clear</button>
+    </div>
+
+    <a href="http://localhost:5173">Please use our main website</a>
+
+    <div id="error" class="error hidden"></div>
+    <div id="loading" class="loading hidden">
+      <div class="spinner"></div>
+      <p>Processing your data...</p>
+    </div>
+
+    <div id="results" class="hidden">
+      <div class="stats-container">
+        <div class="stat-card">
+          <div class="stat-value" id="totalTransactions">0</div>
+          <div class="stat-label">Total Transactions</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="totalSpent">€0</div>
+          <div class="stat-label">Total Spent</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="totalIncome">€0</div>
+          <div class="stat-label">Total Income</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="avgTransaction">€0</div>
+          <div class="stat-label">Avg Transaction</div>
+        </div>
+      </div>
+
+      <div class="charts-container">
+        <div class="chart-card">
+          <h3>💰 Monthly Balance Flow</h3>
+          <div class="chart-container">
+            <canvas id="balanceChart"></canvas>
+          </div>
+        </div>
+
+        <div class="chart-card">
+          <h3>🏪 Top Spending Categories</h3>
+          <div class="chart-container">
+            <canvas id="categoryChart"></canvas>
+          </div>
+        </div>
+
+        <div class="chart-card">
+          <h3>📅 Daily Spending Pattern</h3>
+          <div class="chart-container">
+            <canvas id="dailyChart"></canvas>
+          </div>
+        </div>
+
+        <div class="chart-card">
+          <h3>💳 Transaction Types</h3>
+          <div class="chart-container">
+            <canvas id="typeChart"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://js.puter.com/v2/"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+  <script src="popup.js"></script>
+</body>
+</html>

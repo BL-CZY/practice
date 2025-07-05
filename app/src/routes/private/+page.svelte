@@ -148,6 +148,32 @@ Requirements:
 - No explanations or additional text
 - The indices should acctually match the indices in the original list
 
+You can use this as a examples of categories:
+        function getCategory(description) {
+            const desc = description.toLowerCase();
+            if (desc.includes('mcdonald') || desc.includes('pizza') || desc.includes('restaurant') || desc.includes('deli')) {
+                return 'Food & Dining';
+            } else if (desc.includes('spotify') || desc.includes('netflix') || desc.includes('cinema') || desc.includes('concert')) {
+                return 'Entertainment';
+            } else if (desc.includes('bookstore') || desc.includes('book')) {
+                return 'Books & Education';
+            } else if (desc.includes('zara') || desc.includes('clothing')) {
+                return 'Shopping & Clothing';
+            } else if (desc.includes('tech') || desc.includes('google')) {
+                return 'Technology';
+            } else if (desc.includes('lidl') || desc.includes('supermarket') || desc.includes('grocery')) {
+                return 'Groceries';
+            } else if (desc.includes('parking') || desc.includes('transport')) {
+                return 'Transportation';
+            } else if (desc.includes('rent') || desc.includes('monthly')) {
+                return 'Housing';
+            } else if (desc.includes('payroll') || desc.includes('salary')) {
+                return 'Income';
+            } else {
+                return 'Other';
+            }
+        }
+
 Expected output format:
 [{"category": "category1", "indices": [1,2]}, {"category": "category2", "indices": [3]}]`;
 		console.log('Prompt:', PROMPT);
