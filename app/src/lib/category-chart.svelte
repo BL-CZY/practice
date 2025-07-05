@@ -54,8 +54,20 @@
 	<div class="card bg-base-200 mb-8 shadow-xl">
 		<div class="card-body">
 			<h2 class="card-title">Spending by Category</h2>
-			<div class="h-64">
+			<div class="h-[500px] lg:h-auto">
 				<canvas use:ChartCreatorInstance.pie={pieConfig}></canvas>
+			</div>
+		</div>
+	</div>
+{:else}
+	<div class="card bg-base-200 mb-8 shadow-xl">
+		<div class="card-body">
+			<h2 class="card-title">Spending by Category</h2>
+			<div class="flex h-auto items-center justify-center">
+				<div class="flex flex-col items-center gap-4">
+					<div class="loading loading-spinner loading-lg text-primary"></div>
+					<p class="text-base-content/70 text-sm font-medium">Loading spending data...</p>
+				</div>
 			</div>
 		</div>
 	</div>
