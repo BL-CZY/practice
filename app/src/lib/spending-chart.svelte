@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { trend } from '$lib/chart';
+	import { ChartCreatorInstance } from '$lib/chart';
 
 	const { table }: { table: string[][] } = $props();
 
@@ -75,7 +75,7 @@
 		<div class="card-body">
 			<h2 class="card-title">Spending Trend</h2>
 			<div class="h-64">
-				<canvas use:trend={spendingTrendConfig}></canvas>
+				<canvas use:ChartCreatorInstance.trend={spendingTrendConfig}></canvas>
 			</div>
 		</div>
 	</div>

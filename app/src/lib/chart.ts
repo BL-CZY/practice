@@ -1,13 +1,11 @@
 import { Chart } from 'chart.js/auto';
 
-let chartObjects: Map<string, Chart> = new Map();
+export class ChartCreator {
+	private chartObjects: Map<string, Chart> = new Map();
 
-export function trend(
-	node: HTMLCanvasElement,
-	config: { type: string; data: any; id: string; options?: any }
-): { update: (config: any) => void; destroy: () => void } {
-	function setupChart(chartConfig: any): void {
-		const existingChart = chartObjects.get(chartConfig.id);
+	// Create or update a chart instance
+	private setupChart(node: HTMLCanvasElement, chartConfig: any): void {
+		const existingChart = this.chartObjects.get(chartConfig.id);
 		if (existingChart) {
 			existingChart.destroy();
 		}
@@ -15,13 +13,14 @@ export function trend(
 		const newChart = new Chart(node, {
 			type: chartConfig.type,
 			data: chartConfig.data,
-			options: chartConfig.options || getDefaultOptions(chartConfig.type)
+			options: chartConfig.options || this.getDefaultOptions(chartConfig.type)
 		});
 
-		chartObjects.set(chartConfig.id, newChart);
+		this.chartObjects.set(chartConfig.id, newChart);
 	}
 
-	function getDefaultOptions(type: string) {
+	// Default options for different chart types
+	private getDefaultOptions(type: string) {
 		const commonOptions = {
 			responsive: true,
 			maintainAspectRatio: false,
@@ -71,18 +70,48 @@ export function trend(
 		}
 	}
 
-	setupChart(config);
+	// Svelte action for trend charts
+	trend(
+		node: HTMLCanvasElement,
+		config: { type: string; data: any; id: string; options?: any }
+	): { update: (config: any) => void; destroy: () => void } {
+		this.setupChart(node, config);
 
-	return {
-		update(newConfig) {
-			setupChart(newConfig);
-		},
-		destroy() {
-			const chart = chartObjects.get(config.id);
-			if (chart) {
-				chart.destroy();
-				chartObjects.delete(config.id);
+		return {
+			update: (newConfig) => {
+				this.setupChart(node, newConfig);
+			},
+			destroy: () => {
+				const chart = this.chartObjects.get(config.id);
+				if (chart) {
+					chart.destroy();
+					this.chartObjects.delete(config.id);
+				}
 			}
-		}
-	};
+		};
+	}
+
+	// Svelte action for pie charts
+	pie(
+		node: HTMLCanvasElement,
+		config: { type: string; data: any; id: string; options?: any }
+	): { update: (config: any) => void; destroy: () => void } {
+		this.setupChart(node, config);
+
+		return {
+			update: (newConfig) => {
+				this.setupChart(node, newConfig);
+			},
+			destroy: () => {
+				const chart = this.chartObjects.get(config.id);
+				if (chart) {
+					chart.destroy();
+					this.chartObjects.delete(config.id);
+				}
+			}
+		};
+	}
 }
+
+// Export a singleton instance for use as a Svelte action
+export const ChartCreatorInstance = new ChartCreator();
