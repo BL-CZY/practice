@@ -1,5 +1,7 @@
 <script lang="ts">
+	import { onMount } from 'svelte';
 	import { scale } from 'svelte/transition';
+	import { themeChange } from 'theme-change';
 
 	let {
 		logoutHook = () => {},
@@ -16,6 +18,12 @@
 		logoutHook();
 		isMenuOpen = false;
 	}
+
+	// NOTE: the element that is using one of the theme attributes must be in the DOM on mount
+	onMount(() => {
+		themeChange(false);
+		// 👆 false parameter is required for svelte
+	});
 </script>
 
 <div class="navbar bg-base-100 px-4 shadow-lg">
@@ -68,6 +76,7 @@
 	{#if type === 'private'}
 		<!-- Right side - Menu toggle -->
 		<div class="navbar-end">
+			<input type="checkbox" value="light" class="toggle theme-controller" />
 			<div class="dropdown dropdown-end flex items-center justify-center">
 				<button class="btn btn-ghost" onclick={() => toggleMenu()} aria-label="Open user menu">
 					<div class="w-10 rounded-full">
