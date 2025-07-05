@@ -259,6 +259,7 @@ function calculateSavingsAnalysis(
 
 	// Generate recommendations
 	const recommendations = generateSavingsRecommendations(
+		monthlyIncome,
 		currentMonthlySavings,
 		projectedMonthlySavings,
 		savingsRate
@@ -275,36 +276,77 @@ function calculateSavingsAnalysis(
 }
 
 function generateSavingsRecommendations(
+	monthlyIncome: number,
 	currentSavings: number,
 	projectedSavings: number,
 	savingsRate: number
 ): string[] {
 	const recommendations: string[] = [];
 
+	// Calculate specific target amounts
+	const tenPercentTarget = monthlyIncome * 0.1;
+	const twentyPercentTarget = monthlyIncome * 0.2;
+	const deficit = Math.abs(currentSavings);
+
 	if (currentSavings < 0) {
 		recommendations.push(
-			"You're spending more than you earn. Consider reducing expenses immediately."
+			`You're overspending by €${deficit.toFixed(2)} per month. You need to reduce expenses immediately to balance your budget.`
 		);
 		recommendations.push(
-			'Focus on cutting non-essential spending like dining out and entertainment.'
+			`Target: Cut €${deficit.toFixed(2)} from non-essential spending like dining out and entertainment to break even.`
+		);
+		recommendations.push(
+			`Goal: Aim to save at least €${tenPercentTarget.toFixed(2)} per month (10% of your €${monthlyIncome.toFixed(2)} income).`
 		);
 	} else if (savingsRate < 10) {
-		recommendations.push('Try to save at least 10% of your income for emergency fund.');
-		recommendations.push('Consider reducing discretionary spending to increase savings.');
-	} else if (savingsRate < 20) {
+		const shortfall = tenPercentTarget - currentSavings;
 		recommendations.push(
-			'Good savings rate! Consider increasing to 20% for better financial security.'
+			`You're currently saving €${currentSavings.toFixed(2)} per month (${savingsRate.toFixed(1)}%). Try to increase this by €${shortfall.toFixed(2)} to reach the recommended 10% savings rate.`
 		);
-		recommendations.push('Look for additional income sources or investment opportunities.');
+		recommendations.push(
+			`Target: Save €${tenPercentTarget.toFixed(2)} per month for a solid emergency fund foundation.`
+		);
+		recommendations.push(
+			`Consider reducing discretionary spending by €${shortfall.toFixed(2)} per month to reach this goal.`
+		);
+	} else if (savingsRate < 20) {
+		const nextTarget = twentyPercentTarget - currentSavings;
+		recommendations.push(
+			`Good progress! You're saving €${currentSavings.toFixed(2)} per month (${savingsRate.toFixed(1)}%). Consider increasing to €${twentyPercentTarget.toFixed(2)} per month for better financial security.`
+		);
+		recommendations.push(
+			`Challenge: Find an additional €${nextTarget.toFixed(2)} per month to reach the 20% savings rate.`
+		);
+		recommendations.push(
+			`This could come from a side income of €${(nextTarget * 12).toFixed(2)} per year or expense reduction.`
+		);
 	} else {
-		recommendations.push("Excellent savings rate! You're on track for financial independence.");
-		recommendations.push('Consider investing surplus savings for long-term wealth building.');
+		const annualSavings = currentSavings * 12;
+		recommendations.push(
+			`Excellent! You're saving €${currentSavings.toFixed(2)} per month (${savingsRate.toFixed(1)}%), which equals €${annualSavings.toFixed(2)} per year. You're on track for financial independence.`
+		);
+		recommendations.push(
+			`Consider investing your surplus €${(currentSavings - twentyPercentTarget).toFixed(2)} per month for long-term wealth building.`
+		);
+		recommendations.push(
+			`At this rate, you could potentially invest €${((currentSavings - twentyPercentTarget) * 12).toFixed(2)} annually for retirement or other financial goals.`
+		);
 	}
 
 	if (projectedSavings > currentSavings) {
 		const additionalSavings = projectedSavings - currentSavings;
 		recommendations.push(
-			`You could potentially save an additional €${additionalSavings.toFixed(2)} per month by following recommended budget allocations.`
+			`Optimization opportunity: You could potentially save an additional €${additionalSavings.toFixed(2)} per month (€${(additionalSavings * 12).toFixed(2)} per year) by following recommended budget allocations.`
+		);
+	}
+
+	// Add specific emergency fund recommendation
+	const emergencyFundTarget = monthlyIncome * 6; // 6 months of expenses
+	const monthsToEmergencyFund = currentSavings > 0 ? emergencyFundTarget / currentSavings : 0;
+
+	if (currentSavings > 0) {
+		recommendations.push(
+			`Emergency fund target: €${emergencyFundTarget.toFixed(2)} (6 months of income). At your current savings rate, you'll reach this in ${Math.ceil(monthsToEmergencyFund)} months.`
 		);
 	}
 

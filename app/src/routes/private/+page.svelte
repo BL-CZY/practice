@@ -7,7 +7,8 @@
 	import CategoryChart from '$lib/category-chart.svelte';
 	import { untrack } from 'svelte';
 	import Chatbot from '$lib/chatbot.svelte';
-	import { uploadAndAnalyze } from '$lib/frontend-api';
+	import { uploadAndAnalyze, type BudgetAnalysisResult } from '$lib/frontend-api';
+	import BudgetFeedback from '$lib/budget-feedback.svelte';
 
 	let goals: Goal[] = $state([]); // Initialize goals state
 
@@ -117,10 +118,14 @@
 		$inspect('categoryInfo', categoryInfo);
 	});
 
+	let report: BudgetAnalysisResult | null = $state(null);
+
 	$effect(() => {
 		categories;
 		if (categories.length > 0) {
-			uploadAndAnalyze(raw, categoryInfo);
+			setTimeout(async () => {
+				report = await uploadAndAnalyze(raw, categoryInfo);
+			});
 		}
 	});
 
@@ -221,10 +226,11 @@ Expected output format:
 <!-- =========================
      CSV Upload Section
 ========================= -->
+
 <div class="bg-base-200 min-h-screen p-2 sm:p-4 lg:p-6">
 	<!-- Header Section -->
 	<div class="mb-6 lg:mb-8">
-		<h1 class="text-base-content text-2xl font-bold lg:text-3xl">Financial Dashboard</h1>
+		<h1 class="text-base-content text-2xl font-bold lg:text-3xl">Smart Save</h1>
 		<p class="text-base-content/70 text-sm lg:text-base">
 			Upload your CSV file to analyze spending patterns and get insights
 		</p>
@@ -265,6 +271,9 @@ Expected output format:
 			{/if}
 		</div>
 	</div>
+
+	{#if table.length > 0}
+		<BudgetFeedback budgetResult={report} />{/if}
 
 	{#if table.length > 0}
 		<!-- Dashboard Grid Layout -->

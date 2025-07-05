@@ -1,17 +1,17 @@
 // types.ts - Define the types for the API responses
-interface CategorySpending {
+export interface CategorySpending {
 	category: string;
 	sum: number;
 }
 
-interface UploadResponse {
+export interface UploadResponse {
 	uuid: string;
 	message: string;
 	csvRowCount: number;
 	categoryCount: number;
 }
 
-interface BudgetAnalysis {
+export interface BudgetAnalysis {
 	category: string;
 	budgetAmount: number;
 	actualSpending: number;
@@ -19,7 +19,7 @@ interface BudgetAnalysis {
 	isOverBudget: boolean;
 }
 
-interface SavingsAnalysis {
+export interface SavingsAnalysis {
 	monthlyIncome: number;
 	totalSpending: number;
 	currentMonthlySavings: number;
@@ -28,7 +28,7 @@ interface SavingsAnalysis {
 	recommendations: string[];
 }
 
-interface BudgetReport {
+export interface BudgetReport {
 	uuid: string;
 	analysisDate: string;
 	totalIncome: number;
@@ -48,7 +48,7 @@ interface ApiError {
 }
 
 // API Response types
-type UploadResult =
+export type UploadResult =
 	| {
 			success: true;
 			data: UploadResponse;
@@ -59,7 +59,7 @@ type UploadResult =
 			statusCode: number;
 	  };
 
-type BudgetAnalysisResult =
+export type BudgetAnalysisResult =
 	| {
 			success: true;
 			data: BudgetReport;
