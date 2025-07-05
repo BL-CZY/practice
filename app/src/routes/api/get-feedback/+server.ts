@@ -1,6 +1,7 @@
 // src/routes/api/upload-csv/+page.server.ts
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
+import { allData, type CategorySpending, type StoredData } from '$lib/server/backend';
 
 // Budget analysis types
 interface BudgetAnalysis {
@@ -81,6 +82,8 @@ export const GET: RequestHandler = async ({ url }) => {
 
 		// Analyze the transaction data
 		const budgetReport = analyzeBudget(uuid, storedData);
+
+		allData.delete(uuid); // Clean up data after analysis
 
 		return json(budgetReport);
 	} catch (error) {
@@ -306,55 +309,4 @@ function generateSavingsRecommendations(
 	}
 
 	return recommendations;
-}
-
-function parseCSV(csvContent: string): string[][] {
-	const lines = csvContent.trim().split('\n');
-	const result: string[][] = [];
-
-	for (const line of lines) {
-		// Simple CSV parsing - handles basic cases
-		// For production, consider using a proper CSV parser library
-		const row = line.split(',').map((field) => field.trim());
-		result.push(row);
-	}
-
-	return result;
-}
-
-function validateCSVStructure(data: string[][]): { isValid: boolean; error?: string } {
-	if (data.length === 0) {
-		return { isValid: false, error: 'CSV is empty' };
-	}
-
-	// Check header row
-	const header = data[0];
-	if (header.length !== EXPECTED_FIELDS.length) {
-		return {
-			isValid: false,
-			error: `Expected ${EXPECTED_FIELDS.length} columns, got ${header.length}`
-		};
-	}
-
-	// Validate header fields
-	for (let i = 0; i < EXPECTED_FIELDS.length; i++) {
-		if (header[i] !== EXPECTED_FIELDS[i]) {
-			return {
-				isValid: false,
-				error: `Expected column ${i} to be '${EXPECTED_FIELDS[i]}', got '${header[i]}'`
-			};
-		}
-	}
-
-	// Validate data rows have correct number of columns
-	for (let i = 1; i < data.length; i++) {
-		if (data[i].length !== EXPECTED_FIELDS.length) {
-			return {
-				isValid: false,
-				error: `Row ${i} has ${data[i].length} columns, expected ${EXPECTED_FIELDS.length}`
-			};
-		}
-	}
-
-	return { isValid: true };
 }

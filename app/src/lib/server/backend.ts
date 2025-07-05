@@ -1,13 +1,13 @@
 // Types for stored data
-interface CategorySpending {
+export interface CategorySpending {
 	category: string;
 	sum: number;
 }
 
-interface StoredData {
+export interface StoredData {
 	csvData: string[][];
 	categorySpending: CategorySpending[];
 }
 
 // Global map to store parsed CSV data and category spending
-let allData = new Map<string, StoredData>();
+export let allData = new Map<string, StoredData>();

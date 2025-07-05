@@ -7,6 +7,7 @@
 	import CategoryChart from '$lib/category-chart.svelte';
 	import { untrack } from 'svelte';
 	import Chatbot from '$lib/chatbot.svelte';
+	import { uploadAndAnalyze } from '$lib/frontend-api';
 
 	let goals: Goal[] = $state([]); // Initialize goals state
 
@@ -25,6 +26,8 @@
 		'currency'
 	];
 
+	let raw = $state('');
+
 	// --- CSV File Upload Handler ---
 	function handleFile(event: Event) {
 		error = '';
@@ -36,6 +39,7 @@
 		const reader = new FileReader();
 		reader.onload = (e) => {
 			const text = e.target?.result as string;
+			raw = text;
 			const parsed = extractCsvData(text);
 
 			if (
@@ -111,6 +115,13 @@
 		});
 
 		$inspect('categoryInfo', categoryInfo);
+	});
+
+	$effect(() => {
+		categories;
+		if (categories.length > 0) {
+			uploadAndAnalyze(raw, categoryInfo);
+		}
 	});
 
 	async function getCategories(time: number = 3) {

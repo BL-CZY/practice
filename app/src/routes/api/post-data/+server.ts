@@ -2,6 +2,7 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { v4 as uuidv4 } from 'uuid';
+import { allData, type CategorySpending } from '$lib/server/backend';
 
 // Expected CSV fields
 const EXPECTED_FIELDS = ['', 'date', 'description', 'amount', 'type', 'account_number', 'currency'];
@@ -10,7 +11,7 @@ export const POST: RequestHandler = async ({ request }) => {
 	try {
 		// Get the CSV data and category spending from the request
 		const formData = await request.formData();
-		const csvFile = formData.get('csv') as File;
+		const csvFile = formData.get('csv') as string;
 		const categorySpendingJson = formData.get('categorySpending') as string;
 
 		if (!csvFile) {
@@ -35,11 +36,8 @@ export const POST: RequestHandler = async ({ request }) => {
 			return json({ error: categoryValidationResult.error }, { status: 400 });
 		}
 
-		// Read the CSV content
-		const csvContent = await csvFile.text();
-
 		// Parse CSV into string[][]
-		const parsedData = parseCSV(csvContent);
+		const parsedData = parseCSV(csvFile);
 
 		if (parsedData.length === 0) {
 			return json({ error: 'Empty CSV file' }, { status: 400 });
@@ -67,57 +65,6 @@ export const POST: RequestHandler = async ({ request }) => {
 	} catch (error) {
 		console.error('Error processing CSV:', error);
 		return json({ error: 'Failed to process CSV file' }, { status: 500 });
-	}
-};
-
-// Alternative endpoint for direct CSV string upload
-export const PUT: RequestHandler = async ({ request }) => {
-	try {
-		const { csvData, categorySpending } = await request.json();
-
-		if (!csvData || typeof csvData !== 'string') {
-			return json({ error: 'No CSV data provided' }, { status: 400 });
-		}
-
-		if (!categorySpending || !Array.isArray(categorySpending)) {
-			return json({ error: 'No category spending data provided' }, { status: 400 });
-		}
-
-		// Validate category spending structure
-		const categoryValidationResult = validateCategorySpending(categorySpending);
-		if (!categoryValidationResult.isValid) {
-			return json({ error: categoryValidationResult.error }, { status: 400 });
-		}
-
-		// Parse CSV into string[][]
-		const parsedData = parseCSV(csvData);
-
-		if (parsedData.length === 0) {
-			return json({ error: 'Empty CSV data' }, { status: 400 });
-		}
-
-		// Validate CSV structure
-		const validationResult = validateCSVStructure(parsedData);
-		if (!validationResult.isValid) {
-			return json({ error: validationResult.error }, { status: 400 });
-		}
-
-		// Generate UUID and store the data
-		const uuid = uuidv4();
-		allData.set(uuid, {
-			csvData: parsedData,
-			categorySpending: categorySpending
-		});
-
-		return json({
-			uuid,
-			message: 'CSV data and category spending uploaded successfully',
-			csvRowCount: parsedData.length,
-			categoryCount: categorySpending.length
-		});
-	} catch (error) {
-		console.error('Error processing CSV:', error);
-		return json({ error: 'Failed to process CSV data' }, { status: 500 });
 	}
 };
 
