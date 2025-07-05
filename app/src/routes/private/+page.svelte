@@ -232,7 +232,8 @@ Expected output format:
 	<div class="mb-6 lg:mb-8">
 		<h1 class="text-base-content text-2xl font-bold lg:text-3xl">Smart Save</h1>
 		<p class="text-base-content/70 text-sm lg:text-base">
-			Upload your CSV file to analyze spending patterns and get insights
+			Upload your CSV file to analyze spending patterns and get insights <br />
+			There is an AI assistant that can help you with your budget in the bottom right corner.
 		</p>
 	</div>
 
@@ -273,7 +274,16 @@ Expected output format:
 	</div>
 
 	{#if table.length > 0}
-		<BudgetFeedback budgetResult={report} />{/if}
+		<BudgetFeedback
+			budgetResult={report}
+			unit={(() => {
+				if (table.length > 1 && table[1].length > 6) {
+					return table[1][6];
+				} else {
+				}
+				return 'EUR'; // Default currency if not found
+			})()}
+		/>{/if}
 
 	{#if table.length > 0}
 		<!-- Dashboard Grid Layout -->

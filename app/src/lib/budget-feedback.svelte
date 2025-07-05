@@ -3,13 +3,14 @@
 	import type { BudgetAnalysisResult } from './frontend-api';
 
 	// Props
-	let { budgetResult }: { budgetResult: BudgetAnalysisResult | null } = $props();
+	let { budgetResult, unit = 'EUR' }: { budgetResult: BudgetAnalysisResult | null; unit: string } =
+		$props();
 
 	// Helper functions
 	function formatCurrency(amount: number) {
 		return new Intl.NumberFormat('en-US', {
 			style: 'currency',
-			currency: 'EUR'
+			currency: unit
 		}).format(amount);
 	}
 
