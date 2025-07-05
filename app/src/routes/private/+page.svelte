@@ -116,8 +116,11 @@
 	async function getCategories(time: number = 3) {
 		const list = getDebitDescriptions();
 		$inspect('list', list);
-		const PROMPT = `Analyze the following list of items (each with a description and index) and group them into main categories. Return ONLY a valid JSON array of objects, each with a "category" (string) and "indices" (array of numbers for the matching items). Do not include any explanations, formatting, or additional text.
-
+		const PROMPT = `Analyze the following list of items (each with a description and index) and group them into main categories PROVIDED. Return ONLY a valid JSON array of objects, each with a "category" (string) and "indices" (array of numbers for the matching items). Do not include any explanations, formatting, or additional text.
+You must use the following categories:
+Rent, Groceries, Utilities, Entertainment, Transportation, Dining Out, Shopping, Health, Travel, Other
+If an item does not fit any of these categories, put it in "Other".
+If there is a category that is not used, do not include it in the output.
 Items:
 ${JSON.stringify(list, null, 2)}
 
